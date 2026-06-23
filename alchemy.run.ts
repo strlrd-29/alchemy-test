@@ -22,8 +22,8 @@ export default Alchemy.Stack(
 
     if (process.env.PULL_REQUEST) {
       yield* GitHub.Comment("preview-comment", {
-        owner: "your-org",
-        repository: "your-repo",
+        owner: "strlrd-29",
+        repository: "alchemy-test",
         issueNumber: Number(process.env.PULL_REQUEST),
         body: Output.interpolate`
          ## Preview Deployed
