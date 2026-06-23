@@ -49,8 +49,8 @@ export default Alchemy.Stack(
     });
 
     yield* GitHub.Secret("cf-account-id", {
-      owner: "your-org",
-      repository: "your-repo",
+      owner: "strlrd-29",
+      repository: "alchemy-test",
       name: "CLOUDFLARE_ACCOUNT_ID",
       value: Redacted.make(accountId),
     });

@@ -1,24 +1,46 @@
-import * as Alchemy from 'alchemy'
-import * as Cloudflare from 'alchemy/Cloudflare'
-import * as Effect from 'effect/Effect'
-import { Bucket } from './src/bucket'
-import Worker from './src/worker'
+import * as Alchemy from "alchemy";
+import * as Cloudflare from "alchemy/Cloudflare";
+import * as GitHub from "alchemy/GitHub";
+import * as Output from "alchemy/Output";
+import * as Effect from "effect/Effect";
+import * as Layer from "effect/Layer";
+import { Bucket } from "./src/bucket.ts";
+import Worker from "./src/worker.ts";
 
 export default Alchemy.Stack(
   "MyApp",
   {
-    providers: Cloudflare.providers(),
-    state: Cloudflare.state()
+    providers: Layer.mergeAll(
+      Cloudflare.providers(),
+      GitHub.providers(),
+    ),
+    state: Cloudflare.state(),
   },
   Effect.gen(function* () {
-    // we will add resources here
-    const bucket = yield* Bucket
-    const worker = yield* Worker
+    const bucket = yield* Bucket;
+    const worker = yield* Worker;
+
+    if (process.env.PULL_REQUEST) {
+      yield* GitHub.Comment("preview-comment", {
+        owner: "your-org",
+        repository: "your-repo",
+        issueNumber: Number(process.env.PULL_REQUEST),
+        body: Output.interpolate`
+         ## Preview Deployed
+
+         **URL:** ${worker.url}
+
+         Built from commit ${process.env.GITHUB_SHA?.slice(0, 7)}
+
+         ---
+         _This comment updates automatically with each push._
+       `,
+      });
+    }
 
     return {
       bucketName: bucket.bucketName,
-      url: worker.url
-    }
-  })
-
-)
+      url: worker.url,
+    };
+  }),
+);
