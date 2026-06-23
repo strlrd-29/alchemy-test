@@ -26,7 +26,7 @@ export default Cloudflare.Worker(
 
         const object = yield* bucket.get(key)
         if (object === null) {
-          return HttpServerResponse.text("Not found", { status: 404 })
+          return HttpServerResponse.text("Not found!", { status: 404 })
         }
 
         const text = yield* object.text()
